@@ -1,0 +1,12 @@
+# ignore pycache files
+*.pyc
+
+# ignore record files
+*.pickle
+*.xz
+*.txt
+
+# ignore images
+*.jpeg
+*.jpg
+*.png
