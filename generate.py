@@ -53,16 +53,11 @@ def raycast(pos, angle, max_range, img):
 	return math.sqrt(best_distance);
 	# return best_point;
 
-
-
-
-
-
 # generates a lidar scan for each position
 def main():
 	# load file
 	filename = "record.txt";
-	file = open("Records/" + filename, 'r');
+	file = open(filename, 'r');
 	map_name = file.readline().strip();
 	poses = [];
 	for line in file:
@@ -70,23 +65,17 @@ def main():
 		poses.append([x,y,angle]);
 
 	# load map
-	map_img = cv2.imread(map_name, cv2.IMREAD_GRAYSCALE);
+	map_img = pm.loadMap(map_name);
 
-	# DEBUG CAST
-	# raycast((400,400), 0, 400, map_img);
-	
 	# laser angles
 	angles = [];
-	for deg in range(0,360,2):
+	for deg in range(0,360,1):
 		angles.append(deg);
 
 	# loop through positions
 	scans = [];
 	counter = 0;
 	for pose in poses:
-		# DEBUG DEBUG DEBUG
-		# copy = np.copy(map_img);
-
 		# progress check
 		counter += 1;
 		print(str(counter) + " of " + str(len(poses)));
@@ -95,24 +84,12 @@ def main():
 		scan = [];
 		x,y,angle = pose;
 		for deg in angles:
-			dist = raycast((int(x),int(y)), angle + deg, 400, map_img);
+			dist = raycast((int(x),int(y)), angle + deg, 1000, map_img);
 			scan.append([deg, dist]);
-
-			# DEBUG DEBUG DEBUG
-			# px,py = pm.hitPoint(dist, deg, [x,y], angle);
-			# copy[py,px] = 100;
-
 		scans.append(scan);
 
-		# DEBUG DEBUG
-		# cv2.imshow("Debug", copy);
-		# cv2.waitKey(0);
-
 	# save pickle
-	pickle.dump(scans, lzma.open("PICKLE.xz", 'wb'));
-
-	# load pickle and check
-	# loaded_scans = pickle.load(lzma.open("PICKLE.xz", 'rb'));
+	pickle.dump(scans, lzma.open("PLAYBACK.xz", 'wb'));
 
 if __name__ == "__main__":
 	main();

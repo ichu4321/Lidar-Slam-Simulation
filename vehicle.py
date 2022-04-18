@@ -14,7 +14,6 @@ class Vehicle:
 			[-5,7],
 			[-5,-7]
 		];
-		self.color = (150,200,0);
 
 	# integer cast a point
 	def intify(self, point):
@@ -41,6 +40,12 @@ class Vehicle:
 		ry = x * rsin + y * rcos;
 		return [rx, ry];
 
+	# set position from a "Pose" (timestamp, x, y, angle)
+	def setPose(self, pose):
+		_, x, y, angle = pose;
+		self.pos = [x,y];
+		self.angle = angle;
+
 	# get a display-representation of the points
 	def getPoints(self):
 		display_points = [];
@@ -52,13 +57,13 @@ class Vehicle:
 		return display_points;
 
 	# draw self on image
-	def draw(self, img):
+	def draw(self, img, color = (100,0,0)):
 		# get vehicle points
 		draw_points = self.getPoints();
 		draw_points = np.array(draw_points);
 
 		# draw polygon
-		cv2.fillPoly(img, pts = [draw_points], color = self.color);
+		cv2.fillPoly(img, pts = [draw_points], color = color);
 
 		# draw actual center
 		x, y = self.intify(self.pos);
@@ -73,3 +78,9 @@ class Vehicle:
 		point = [move, 0];
 		point = self.rotate(point, self.angle);
 		self.pos = self.translate(self.pos, point);
+
+	# update position from odometry (turn1, move, turn2)
+	def updateOdom(self, odom):
+		turn1, move, turn2 = odom;
+		self.update(move, turn1);
+		self.update(0, turn2);

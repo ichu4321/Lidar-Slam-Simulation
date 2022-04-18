@@ -9,15 +9,13 @@ from vehicle import Vehicle
 
 
 def main():
-	# create display
-	perm = np.zeros((800,800,3), np.uint8);
-	display = np.zeros_like(perm);
-
 	# load map
-	filename = "map.png";
-	map_img = cv2.imread("Maps/" + filename);
-	map_img = cv2.resize(map_img, (800,800));
+	filename = "Maps/" + "map.png";
+	map_img = cv2.imread(filename);
 	perm = map_img;
+
+	# create display
+	display = np.zeros_like(perm);
 
 	# create a vehicle
 	car = Vehicle([100,400], 0);
@@ -34,6 +32,7 @@ def main():
 	record = [];
 
 	# display loop
+	recording = False;
 	done = False;
 	last = time.time();
 	elapsed = 0.0;
@@ -53,15 +52,20 @@ def main():
 		turn = 0.0;
 
 		# draw car
-		car.draw(display);
+		if recording:
+			color = (0,200,0);
+		else:
+			color = (0,0,200);
+		car.draw(display, color = color);
 
 		# record position
-		record_timer += dt;
-		if record_timer >= record_dt:
-			record_timer = 0.0;
-			x, y = car.pos;
-			angle = car.angle;
-			record.append([elapsed,x,y,angle]);
+		if recording:
+			record_timer += dt;
+			if record_timer >= record_dt:
+				record_timer = 0.0;
+				x, y = car.pos;
+				angle = car.angle;
+				record.append([elapsed,x,y,angle]);
 
 		# show
 		cv2.imshow("Display", display);
@@ -79,10 +83,13 @@ def main():
 			turn = turn_spd;
 		if kb.is_pressed('a'):
 			turn = -turn_spd;
+		# toggle recording
+		if kb.is_pressed('r'):
+			recording = not recording;
 
 	# make record of position
 	file = open("record.txt", 'w');
-	file.write("Maps/" + filename + "\n");
+	file.write(filename + "\n");
 	for item in record:
 		outstr = "";
 		for elem in item:
