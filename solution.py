@@ -20,7 +20,7 @@ class SLAMMER:
 		raise NotImpementedError("update() function must return x,y,angle");
 
 class RandomParticles(SLAMMER):
-	def __init__(self, width, height, initial_pose, num_particles = 20, num_iters = 5):
+	def __init__(self, width, height, initial_pose, num_particles = 20, num_iters = 10):
 		# initialize base
 		super(RandomParticles, self).__init__(width, height, initial_pose);
 

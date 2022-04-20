@@ -2,6 +2,9 @@ import math
 import cv2
 import numpy as np
 
+import lzma
+import pickle
+
 # rotate point
 def rotate(point, angle):
 	# calculate angles
@@ -46,24 +49,42 @@ def loadMap(filename):
 	return mask;
 
 # load the records file
-def load(filename):
+# def load(filename):
+# 	# get the map
+# 	file = open(filename, 'r');
+# 	map_filename = file.readline().strip();
+# 	map_mask = loadMap(map_filename);
+# 	map_img = cv2.imread(map_filename);
+
+# 	# get the poses
+# 	poses = [];
+# 	for line in file:
+# 		# parse the line and save
+# 		poses.append([float(a) for a in line.strip().split(' ')]);
+# 	file.close();
+
+# 	return map_img, map_mask, poses;
+
+# load the playback file
+def loadPlayback(filename):
+	# unpack the playback file
+	records = pickle.load(lzma.open("PLAYBACK.xz", 'rb'));
+
 	# get the map
-	file = open(filename, 'r');
-	map_filename = file.readline().strip();
-	map_mask = loadMap(map_filename);
-	map_img = cv2.imread(map_filename);
+	map_img = records[0];
+	gray_map = cv2.cvtColor(map_img, cv2.COLOR_BGR2GRAY);
+	_, map_mask = cv2.threshold(gray_map, 1, 255, cv2.THRESH_BINARY);
+	records = records[1:];
 
-	# get the poses
+	# pull out the positions and the scans
 	poses = [];
-	for line in file:
-		# parse the line and save
-		poses.append([float(a) for a in line.strip().split(' ')]);
-	file.close();
+	scans = [];
+	for record in records:
+		pose, scan = record;
+		poses.append(pose);
+		scans.append(scan);
+	return map_img, map_mask, poses, scans;
 
-	# double up the first position
-	poses.insert(0, poses[0]);
-
-	return map_img, map_mask, poses;
 
 # 2d distance between 2 points
 def dist2D(p1, p2):

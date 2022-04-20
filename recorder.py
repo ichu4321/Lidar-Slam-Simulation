@@ -87,7 +87,7 @@ def record(mapfile):
 			recording = True;
 
 	# make record of position
-	file = open("record.txt", 'w');
+	file = open("positions.txt", 'w');
 	file.write(mapfile + "\n");
 	for item in record:
 		outstr = "";

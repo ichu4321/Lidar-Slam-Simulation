@@ -56,13 +56,12 @@ def raycast(pos, angle, max_range, img):
 # generates a lidar scan for each position
 def generate(pixel_range, num_lasers):
 	# load file
-	filename = "record.txt";
+	filename = "positions.txt";
 	file = open(filename, 'r');
 	map_name = file.readline().strip();
 	poses = [];
 	for line in file:
-		ts,x,y,angle = [float(a) for a in line.strip().split(' ')];
-		poses.append([x,y,angle]);
+		poses.append([float(a) for a in line.strip().split(' ')]);
 
 	# load map
 	map_img = pm.loadMap(map_name);
@@ -85,14 +84,22 @@ def generate(pixel_range, num_lasers):
 
 		# do a scan
 		scan = [];
-		x,y,angle = pose;
+		ts,x,y,angle = pose;
 		for deg in angles:
 			dist = raycast((int(x),int(y)), angle + deg, pixel_range, map_img);
 			scan.append([deg, dist]);
 		scans.append(scan);
 
-	# save pickle
-	pickle.dump(scans, lzma.open("PLAYBACK.xz", 'wb'));
+	# combine scans and poses
+	color_map_img = cv2.imread(map_name);
+	records = [color_map_img]; # THE FIRST ELEMENT WILL BE THE MAP IMAGE
+	for a in range(len(scans)):
+		scan = scans[a];
+		pose = poses[a];
+		records.append([pose, scan]);
+
+	# save compressed pickle of records
+	pickle.dump(records, lzma.open("PLAYBACK.xz", 'wb'));
 
 if __name__ == "__main__":
 	generate(1000, 360);

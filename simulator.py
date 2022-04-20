@@ -1,6 +1,4 @@
 import cv2
-import lzma
-import pickle
 import numpy as np
 
 from vehicle import Vehicle
@@ -20,12 +18,13 @@ def simulate():
 	move_noise = 0.10;
 
 	# load records file
-	bg, grid, poses = pm.load("record.txt");
-	height, width = bg.shape[:2];
+	# bg, grid, poses = pm.load("record.txt");
+	# height, width = bg.shape[:2];
 
 	# load playback file
-	scans = pickle.load(lzma.open("PLAYBACK.xz", 'rb'));
-	scans.insert(0, scans[0]);
+	# scans = pickle.load(lzma.open("PLAYBACK.xz", 'rb'));
+	bg, grid, poses, scans = pm.loadPlayback("PLAYBACK.xz");
+	height, width = bg.shape[:2];
 
 	# set initial position
 	ground_truth.setPose(poses[0]);
@@ -45,8 +44,10 @@ def simulate():
 
 		# get current and previous poses to get odom
 		currPos = poses[index];
-		lastPos = poses[index - 1];
-		turn1, move, turn2 = pm.getOdom(lastPos, currPos);
+		turn1 = move = turn2 = 0;
+		if index > 0:
+			lastPos = poses[index - 1];
+			turn1, move, turn2 = pm.getOdom(lastPos, currPos);
 
 		# add noise
 		turn1, move, turn2 = noise.odomNoise(turn1, move, turn2, move_noise, turn_noise);
