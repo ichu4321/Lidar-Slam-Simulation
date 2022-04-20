@@ -9,7 +9,7 @@ from solution import RandomParticles
 import noise
 import point_math as pm
 
-def main():
+def simulate():
 	# create vehicles
 	ground_truth = Vehicle();
 	noisy_odom = Vehicle();
@@ -49,8 +49,7 @@ def main():
 		turn1, move, turn2 = pm.getOdom(lastPos, currPos);
 
 		# add noise
-		# turn1, move, turn2 = noise.odomNoise(turn1, move, turn2, move_noise, turn_noise);
-		print([turn1, move, turn2]);
+		turn1, move, turn2 = noise.odomNoise(turn1, move, turn2, move_noise, turn_noise);
 
 		# update position
 		if not freeze:
@@ -65,13 +64,13 @@ def main():
 
 		# draw scan
 		scan = scans[index];
-		x,y = noisy_odom.pos;
-		angle = noisy_odom.angle;
-		pm.updateMap(bg, [x,y,angle], scan, (0,0,255), display = display);
+		x,y = slam_car.pos;
+		angle = slam_car.angle;
+		pm.updateMap(bg, [x,y,angle], scan, (0,200,0), display = display);
 
 		# draw cars
 		ground_truth.draw(display);
-		noisy_odom.draw(display, color = (255,255,255));
+		noisy_odom.draw(display, color = (0,0,150));
 		slam_car.draw(display, color = (0,150,0));
 
 		# show
@@ -93,4 +92,4 @@ def main():
 
 if __name__ == "__main__":
 	# run simulation
-	main();
+	simulate();

@@ -20,7 +20,7 @@ class SLAMMER:
 		raise NotImpementedError("update() function must return x,y,angle");
 
 class RandomParticles(SLAMMER):
-	def __init__(self, width, height, initial_pose, num_particles = 25, num_iters = 10):
+	def __init__(self, width, height, initial_pose, num_particles = 20, num_iters = 5):
 		# initialize base
 		super(RandomParticles, self).__init__(width, height, initial_pose);
 
@@ -30,14 +30,14 @@ class RandomParticles(SLAMMER):
 		self.particles = [];
 
 		# set up blur patterns
-		self.blur = pm.makeBlur(0,255,25);
+		self.blur = pm.makeBlur(0,255,5);
 
 	# uniform random position around position
 	def randParticle(self, x, y, angle):
-		scatter = 3;
+		scatter = 2.0;
 		x += random.uniform(-scatter, scatter);
 		y += random.uniform(-scatter, scatter);
-		angle += random.uniform(-2, 2);
+		angle += random.uniform(-1.0, 1.0);
 		return Particle([x,y,angle]);
 
 	def update(self, odometry, scan):
@@ -46,7 +46,7 @@ class RandomParticles(SLAMMER):
 			self.empty_grid = False;
 			x,y = self.car.pos;
 			angle = self.car.angle;
-			pm.updateMap(self.grid, [x,y,angle], scan, 255);
+			pm.updateMap(self.grid, [x,y,angle], scan, 255, max_dist = 400);
 			# pm.updateMapBlur(self.grid, [x,y,angle], scan, self.blur);
 			return [x,y,angle];
 
@@ -74,10 +74,13 @@ class RandomParticles(SLAMMER):
 
 		# update map with best
 		best = self.bestParticle();
-		pm.updateMap(self.grid, best.pos, scan, 255);
+		pm.updateMap(self.grid, best.pos, scan, 255, max_dist = 400);
 		# pm.updateMapBlur(self.grid, best.pos, scan, self.blur);
 
 		# return final best position
+		x,y,angle = best.pos;
+		self.car.pos = [x,y];
+		self.car.angle = angle;
 		return best.pos;
 
 	# give each particle a score

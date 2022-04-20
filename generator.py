@@ -54,7 +54,7 @@ def raycast(pos, angle, max_range, img):
 	# return best_point;
 
 # generates a lidar scan for each position
-def main():
+def generate(pixel_range, num_lasers):
 	# load file
 	filename = "record.txt";
 	file = open(filename, 'r');
@@ -69,8 +69,11 @@ def main():
 
 	# laser angles
 	angles = [];
-	for deg in range(0,360,1):
+	deg = 0;
+	step = 360.0 / num_lasers;
+	while deg < 360.0:
 		angles.append(deg);
+		deg += step;
 
 	# loop through positions
 	scans = [];
@@ -84,7 +87,7 @@ def main():
 		scan = [];
 		x,y,angle = pose;
 		for deg in angles:
-			dist = raycast((int(x),int(y)), angle + deg, 1000, map_img);
+			dist = raycast((int(x),int(y)), angle + deg, pixel_range, map_img);
 			scan.append([deg, dist]);
 		scans.append(scan);
 
@@ -92,4 +95,4 @@ def main():
 	pickle.dump(scans, lzma.open("PLAYBACK.xz", 'wb'));
 
 if __name__ == "__main__":
-	main();
+	generate(1000, 360);

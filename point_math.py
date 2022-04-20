@@ -132,7 +132,7 @@ def getOdom(currPos, nextPos):
 	return turn1, move, turn2;
 
 # update map with a position and a scan
-def updateMap(map_img, pose, scan, color, display = None):
+def updateMap(map_img, pose, scan, color, display = None, max_dist = None):
 	# draw scan
 	cx,cy,angle = pose;
 	height, width = map_img.shape[:2];
@@ -141,6 +141,9 @@ def updateMap(map_img, pose, scan, color, display = None):
 		deg, dist = point;
 		if dist < 0.01:
 			continue;
+		if max_dist is not None:
+			if dist > max_dist:
+				continue;
 
 		# find hit location and draw
 		x,y = hitPoint(dist, deg, [cx,cy], angle);

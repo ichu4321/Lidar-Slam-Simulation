@@ -19,7 +19,7 @@ def odomNoise(turn1, move, turn2, move_prop, turn_prop):
 	noisy_move = addNoiseNormal(move, move_prop);
 	noisy_turn1 = addNoiseNormal(turn1, turn_prop);
 	noisy_turn2 = addNoiseNormal(turn2, turn_prop);
-	return noisy_turn1, move, noisy_turn2;
+	return noisy_turn1, noisy_move, noisy_turn2;
 
 # generate random proportional noise from sensor
 # noise is proportional to range

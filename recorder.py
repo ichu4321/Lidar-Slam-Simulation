@@ -8,10 +8,9 @@ from vehicle import Vehicle
 
 
 
-def main():
-	# load map
-	filename = "Maps/" + "map.png";
-	map_img = cv2.imread(filename);
+def record(mapfile):
+	# load map;
+	map_img = cv2.imread(mapfile);
 	perm = map_img;
 
 	# create display
@@ -89,7 +88,7 @@ def main():
 
 	# make record of position
 	file = open("record.txt", 'w');
-	file.write(filename + "\n");
+	file.write(mapfile + "\n");
 	for item in record:
 		outstr = "";
 		for elem in item:
@@ -98,8 +97,11 @@ def main():
 		file.write(outstr);
 	file.close();
 
+	# close opencv windows
+	cv2.destroyAllWindows();
+
 
 
 
 if __name__ == "__main__":
-	main();
+	record("Maps/scribbles.png");
