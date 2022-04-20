@@ -97,18 +97,6 @@ def main():
 				odom_car.setPose(poses[index]);
 
 		# draw scan
-		# for point in scan:
-		# 	deg, dist = point;
-		# 	if dist < 0.01:
-		# 		continue;
-		# 	x,y = pm.hitPoint(dist, deg, car.pos, car.angle);
-		# 	if x >= 0 and x < width and y >= 0 and y < height:
-		# 		bg[y,x] = (0,0,255);
-		# 		blank[y,x] = (0,0,255);
-
-		# 		# draw temporary line
-		# 		cx, cy = car.pos;
-		# 		cv2.line(display, (int(cx), int(cy)), (x,y), (100,100,100), 1);
 		x,y = car.pos;
 		angle = car.angle;
 		pm.updateMap(blank, [x,y,angle], scan, (0,0,255), display = display);

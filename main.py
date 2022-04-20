@@ -27,7 +27,7 @@ def main():
 	turn = 0.0; # in degrees
 
 	# record time
-	record_dt = 1.0 / 10; # record position N times per second
+	record_dt = 1.0 / 20; # record position N times per second
 	record_timer = 0.0;
 	record = [];
 
@@ -85,7 +85,7 @@ def main():
 			turn = -turn_spd;
 		# toggle recording
 		if kb.is_pressed('r'):
-			recording = not recording;
+			recording = True;
 
 	# make record of position
 	file = open("record.txt", 'w');

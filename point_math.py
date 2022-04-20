@@ -1,5 +1,6 @@
 import math
 import cv2
+import numpy as np
 
 # rotate point
 def rotate(point, angle):
@@ -130,16 +131,6 @@ def getOdom(currPos, nextPos):
 	turn2 = smallestTurn(turn2);
 	return turn1, move, turn2;
 
-if __name__ == "__main__":
-	# odom test
-	print("Odom Check: ");
-	print(getOdom([0, 0, 0, 20], [0, 5, 0, 0]));
-
-	# map load test
-	mask = loadMap("Maps/map.png");
-	cv2.imshow("Map", mask);
-	cv2.waitKey(0);
-
 # update map with a position and a scan
 def updateMap(map_img, pose, scan, color, display = None):
 	# draw scan
@@ -159,3 +150,119 @@ def updateMap(map_img, pose, scan, color, display = None):
 		# draw temporary line
 		if display is not None:
 			cv2.line(display, (int(cx), int(cy)), (x,y), (100,100,100), 1);
+
+# update map with maxBlit
+def updateMapBlur(map_img, pose, scan, blur_pattern):
+	# draw scan
+	cx,cy,angle = pose;
+	height, width = map_img.shape[:2];
+	for point in scan:
+		# unpack
+		deg, dist = point;
+		if dist < 0.01:
+			continue;
+
+		# find hit location and draw
+		x,y = hitPoint(dist, deg, [cx,cy], angle);
+		maxBlit(map_img, blur_pattern, [y,x]);
+		# if x >= 0 and x < width and y >= 0 and y < height:
+		# 	map_img[y,x] = color;
+
+
+# change scale of value from [min1, max1] -> [min2, max2]
+def reframe(min1, max1, min2, max2, value):
+	# change frame
+	value -= min1;
+	value /= (max1 - min1);
+	value *= (max2 - min2);
+	value += min2;
+
+	# clamp
+	value = max(min2, value);
+	value = min(max2, value);
+	return value;
+
+
+# create blur pattern
+def makeBlur(min_strength, max_strength, radius):
+	# make square
+	length = (radius * 2) + 1;
+	blank = np.zeros((length, length), np.uint8);
+
+	# do math on pixels
+	center = [radius, radius];
+	for y in range(length):
+		for x in range(length):
+			# calculate value
+			dist = dist2D(center, [x,y]);
+			dist = radius - dist;
+			dist = max(dist, 0);
+			value = reframe(0, radius, 0, 255, dist);
+
+			# apply to pixel
+			blank[y,x] = int(value);
+	return blank;
+
+# blit onto image (using numpy.maximum)
+def maxBlit(img, blit_img, center_pos):
+	# unpack
+	x,y = center_pos;
+	height, width = img.shape[:2];
+	radius = int(blit_img.shape[0] / 2); # assume square
+
+	# expand to blit boundaries
+	left = x - radius;
+	right = x + radius;
+	top = y - radius;
+	bottom = y + radius;
+
+	# chop boundaries
+	sx = 0;
+	if left < 0:
+		sx = -left;
+		left = 0;
+
+	sy = 0;
+	if top < 0:
+		sy = -top;
+		top = 0;
+
+	ex = 2 * radius;
+	xmax = width - 1;
+	if right > xmax:
+		ex -= right - xmax;
+		right = xmax;
+
+	ey = 2 * radius;
+	ymax = height - 1;
+	if bottom > ymax:
+		ey -= bottom - ymax;
+		bottom = ymax;
+
+	# chop out portions
+	chop1 = img[top:bottom, left:right];
+	chop2 = blit_img[sy:ey, sx:ex];
+
+	# blit
+	img[top:bottom, left:right] = np.maximum(chop1, chop2);
+
+
+
+if __name__ == "__main__":
+	# blur test
+	blur = makeBlur(0, 255, 25);
+	cv2.imshow("Blur", blur);
+	blank = np.zeros((100,100), np.uint8);
+	maxBlit(blank, blur, [0,0]);
+	maxBlit(blank, blur, [100,100]);
+	maxBlit(blank, blur, [50,50]);
+	cv2.imshow("Blit Test", blank);
+
+	# odom test
+	print("Odom Check: ");
+	print(getOdom([0, 0, 0, 20], [0, 5, 0, 0]));
+
+	# map load test
+	mask = loadMap("Maps/map.png");
+	cv2.imshow("Map", mask);
+	cv2.waitKey(0);
