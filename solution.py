@@ -40,6 +40,34 @@ class RandomParticles(SLAMMER):
 		angle += random.uniform(-1.0, 1.0);
 		return Particle([x,y,angle]);
 
+	# find the best position
+	def locate(self, seed_pos, scan):
+		# re-randomize particles
+		x,y,angle = seed_pos;
+		self.particles = [self.randParticle(x,y,angle) for a in range(self.num_parts)];
+		self.particles.append(Particle(seed_pos));
+
+		# evaluate particles
+		self.evaluate(scan);
+
+	# run localization only
+	def localize(self, odometry, scan):
+		# update to new position
+		self.car.updateOdom(odometry);
+
+		# update position
+		for a in range(self.iters):
+			# update particles
+			x,y = self.car.pos;
+			angle = self.car.angle;
+			self.locate([x,y,angle], scan);
+
+			# update position
+			best = self.bestParticle();
+			x,y,angle = best.pos;
+			self.car.pos = [x,y];
+			self.car.angle = angle;
+
 	def update(self, odometry, scan):
 		# seed the map with the first scan
 		if self.empty_grid:
@@ -53,34 +81,30 @@ class RandomParticles(SLAMMER):
 		# update to new position
 		self.car.updateOdom(odometry);
 
-		# generate a bunch of uniformly random Particles
+		# initial scan
 		x,y = self.car.pos;
-		self.particles = [self.randParticle(x, y, self.car.angle) for a in range(self.num_parts)];
-		self.particles.append(Particle([x,y,self.car.angle]));
-
-		# evaluate particles
-		self.evaluate(scan);
+		angle = self.car.angle;
+		self.locate([x,y,angle], scan);
 
 		# do loop
 		for a in range(self.iters):
 			# generate new random around best
 			best = self.bestParticle();
-			x,y,angle = best.pos;
-			self.particles = [self.randParticle(x, y, angle) for a in range(self.num_parts)];
-			self.particles.append(best);
 
-			# evaluate
-			self.evaluate(scan);
+			# localize again
+			self.locate(best.pos, scan);
 
 		# update map with best
 		best = self.bestParticle();
 		pm.updateMap(self.grid, best.pos, scan, 255, max_dist = 400);
 		# pm.updateMapBlur(self.grid, best.pos, scan, self.blur);
 
-		# return final best position
+		# update car position
 		x,y,angle = best.pos;
 		self.car.pos = [x,y];
 		self.car.angle = angle;
+
+		# return final best position
 		return best.pos;
 
 	# give each particle a score

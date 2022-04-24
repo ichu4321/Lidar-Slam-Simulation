@@ -73,7 +73,7 @@ def loadPlayback(filename):
 	# get the map
 	map_img = records[0];
 	gray_map = cv2.cvtColor(map_img, cv2.COLOR_BGR2GRAY);
-	_, map_mask = cv2.threshold(gray_map, 1, 255, cv2.THRESH_BINARY);
+	_, map_mask = cv2.threshold(gray_map, 1, 255, cv2.THRESH_BINARY_INV);
 	records = records[1:];
 
 	# pull out the positions and the scans

@@ -7,6 +7,8 @@ from solution import RandomParticles
 import noise
 import point_math as pm
 
+from video_saver import VideoSaver
+
 def simulate():
 	# create vehicles
 	ground_truth = Vehicle();
@@ -33,6 +35,10 @@ def simulate():
 
 	# set up slam solution
 	solver = RandomParticles(height, width, poses[0]);
+	blank = np.zeros_like(bg); # DEBUG DEBUG DEBUG
+
+	# DEBUG DEBUG DEBUG
+	writer = VideoSaver("SLAM_Video.mp4");
 
 	# run simulation
 	done = False;
@@ -40,7 +46,11 @@ def simulate():
 	freeze = False;
 	while not done:
 		# refresh display
-		display = np.copy(bg);
+		# display = np.copy(bg); # DEBUG DEBUG DEBUG
+		display = np.copy(blank);
+
+		# get scan
+		scan = scans[index];
 
 		# get current and previous poses to get odom
 		currPos = poses[index];
@@ -59,15 +69,15 @@ def simulate():
 			noisy_odom.update(0, turn2);
 
 			# evaluate solution
-			x,y,angle = solver.update([turn1, move, turn2], scans[index]);
+			x,y,angle = solver.update([turn1, move, turn2], scan);
 			slam_car.pos = [x,y];
 			slam_car.angle = angle;
 
 		# draw scan
-		scan = scans[index];
 		x,y = slam_car.pos;
 		angle = slam_car.angle;
-		pm.updateMap(bg, [x,y,angle], scan, (0,200,0), display = display);
+		# pm.updateMap(bg, [x,y,angle], scan, (0,200,0), display = display);
+		pm.updateMap(blank, [x,y,angle], scan, (0,200,0), display = display); # DEBUG DEBUG DEBUG
 
 		# draw cars
 		ground_truth.draw(display);
@@ -78,6 +88,10 @@ def simulate():
 		cv2.imshow("Display", display);
 		cv2.imshow("Solution", solver.grid);
 		key = cv2.waitKey(100);
+
+		# DEBUG DEBUG DEBUG
+		if not freeze:
+			writer.write(display);
 
 		# update index
 		# freeze = True;
@@ -91,6 +105,11 @@ def simulate():
 		done = key == ord('q');
 	cv2.imwrite("final_map.png", solver.grid);
 
+	# DEBUG DEBUG DEBUG
+	writer.close();
+
 if __name__ == "__main__":
 	# run simulation
 	simulate();
+
+# 1578, -65
