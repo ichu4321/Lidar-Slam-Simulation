@@ -16,6 +16,7 @@ class SLAMMER:
 		self.car.setPose(initial_pose);
 
 	# update grid and return a new position (x,y,angle)
+	# odometry can be applied with self.car.updateOdometry(odometry)
 	def update(self, odometry, scan):
 		raise NotImpementedError("update() function must return x,y,angle");
 

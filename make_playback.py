@@ -1,7 +1,6 @@
 
 import recorder
 import generator
-import simulator
 
 def main():
 	# run the recorder

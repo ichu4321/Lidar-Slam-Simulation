@@ -7,8 +7,6 @@ from solution import RandomParticles
 import noise
 import point_math as pm
 
-from video_saver import VideoSaver
-
 def simulate():
 	# create vehicles
 	ground_truth = Vehicle();
@@ -19,12 +17,7 @@ def simulate():
 	turn_noise = 0.10;
 	move_noise = 0.10;
 
-	# load records file
-	# bg, grid, poses = pm.load("record.txt");
-	# height, width = bg.shape[:2];
-
 	# load playback file
-	# scans = pickle.load(lzma.open("PLAYBACK.xz", 'rb'));
 	bg, grid, poses, scans = pm.loadPlayback("PLAYBACK.xz");
 	height, width = bg.shape[:2];
 
@@ -35,10 +28,6 @@ def simulate():
 
 	# set up slam solution
 	solver = RandomParticles(height, width, poses[0]);
-	blank = np.zeros_like(bg); # DEBUG DEBUG DEBUG
-
-	# DEBUG DEBUG DEBUG
-	writer = VideoSaver("SLAM_Video.mp4");
 
 	# run simulation
 	done = False;
@@ -46,8 +35,7 @@ def simulate():
 	freeze = False;
 	while not done:
 		# refresh display
-		# display = np.copy(bg); # DEBUG DEBUG DEBUG
-		display = np.copy(blank);
+		display = np.copy(bg);
 
 		# get scan
 		scan = scans[index];
@@ -76,8 +64,7 @@ def simulate():
 		# draw scan
 		x,y = slam_car.pos;
 		angle = slam_car.angle;
-		# pm.updateMap(bg, [x,y,angle], scan, (0,200,0), display = display);
-		pm.updateMap(blank, [x,y,angle], scan, (0,200,0), display = display); # DEBUG DEBUG DEBUG
+		pm.updateMap(bg, [x,y,angle], scan, (0,200,0), display = display);
 
 		# draw cars
 		ground_truth.draw(display);
@@ -89,10 +76,6 @@ def simulate():
 		cv2.imshow("Solution", solver.grid);
 		key = cv2.waitKey(100);
 
-		# DEBUG DEBUG DEBUG
-		if not freeze:
-			writer.write(display);
-
 		# update index
 		# freeze = True;
 		index += 1;
@@ -103,10 +86,7 @@ def simulate():
 
 		# process keys
 		done = key == ord('q');
-	cv2.imwrite("final_map.png", solver.grid);
-
-	# DEBUG DEBUG DEBUG
-	writer.close();
+	cv2.imwrite("slam_map.png", solver.grid);
 
 if __name__ == "__main__":
 	# run simulation
