@@ -20,7 +20,7 @@ The program will run through the recorded positions and generate lidar scans for
 run "test_slam.py" to test out the slam algorithm against the playback file.
 This will run with whatever the current slam algorithm is set to and will generate a "slam_map.png" image at the end representing the map it created.
 
-## Test Localization-only
+## Test Localization
 SLAM algorithms can trade off accuracy for speed. For environments that don't change too much; it can be acceptable to run a slow, expensive SLAM algorithm offline to generate a map and then run a faster localization algorithm while guiding a vehicle. This is especially useful on embedded systems where the available CPU is limited. 
 
 In this case, the localization algorithm can be tested by running "test_localization.py" and it can be supplied the map generated from "test_slam.py"
